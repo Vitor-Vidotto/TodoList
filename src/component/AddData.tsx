@@ -24,20 +24,26 @@ const AddData: React.FC = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    try {
-      const collectionRef = collection(db, 'tasks2'); // Substitua 'tasks2' pelo nome da sua coleção
-
-      await addDoc(collectionRef, { taskData: data, completed: false }); // Adiciona um novo documento com os dados fornecidos
-
-      setData('');
-      console.log('Dados Adicionados ao Firestore!');
-      fetchData(); // Atualiza a lista de documentos após adicionar um novo
-    } catch (error) {
-      console.error('Erro ao adicionar ao Firestore:', error);
+ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+  try {
+    if (data.length < 4 || data.length > 20) {
+      console.error('Por favor, insira entre 4 e 20 caracteres.');
+      return; // Retorna se o comprimento não estiver dentro do intervalo desejado
     }
-  };
+
+    const collectionRef = collection(db, 'tasks2');
+
+    await addDoc(collectionRef, { taskData: data, completed: false });
+
+    setData('');
+    console.log('Dados Adicionados ao Firestore!');
+    fetchData();
+  } catch (error) {
+    console.error('Erro ao adicionar ao Firestore:', error);
+  }
+};
+
 
   const handleDelete = async (documentId: string) => {
     try {
@@ -64,8 +70,8 @@ const AddData: React.FC = () => {
   };
 
   return (
-    <div>
-      <h2>Adicionar/Remover Dados</h2>
+    <div style={{ display: 'flex', justifyContent: 'center', flexDirection: 'column' }}>
+       <h2>Adicionar/Remover Dados</h2>
       <form onSubmit={handleSubmit}>
         <input
           type="text"
@@ -75,25 +81,51 @@ const AddData: React.FC = () => {
         />
         <button type="submit">Adicionar</button>
       </form>
-      <h3>Tarefas Pendentes</h3>
-      <ul>
-        {documents.map((doc) => (
-          <li key={doc.id}>
-            {doc.taskData}
-            <button onClick={() => handleMarkAsDone(doc.id)}>Feito</button>
-            <button onClick={() => handleDelete(doc.id)}>Remover</button>
-          </li>
-        ))}
-      </ul>
-      <h3>Tarefas Concluídas</h3>
-      <ul>
-        {completedDocuments.map((doc) => (
-          <li key={doc.id}>
-            {doc.taskData}
-            <button onClick={() => handleDelete(doc.id)}>Remover</button>
-          </li>
-        ))}
-      </ul>
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <div style={{ flex: '1', marginRight: '20px' }}>
+          <h3>Tarefas Pendentes</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '10px' }}>
+            {documents.map((doc) => (
+              <div
+                key={doc.id}
+                style={{
+                  backgroundColor: '#FFCC80',
+                  padding: '10px',
+                  borderRadius: '10px',
+                  boxShadow: '3px 3px 5px rgba(0, 0, 0, 0.3)',
+                }}
+              >
+                <p>{doc.taskData}</p>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px' }}>
+                  <button style={{ marginRight: '8px' }} onClick={() => handleMarkAsDone(doc.id)}>Feito</button>
+                  <button onClick={() => handleDelete(doc.id)}>Remover</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={{ flex: '1', marginLeft: '20px' }}>
+          <h3>Tarefas Concluídas</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '10px' }}>
+            {completedDocuments.map((doc) => (
+              <div
+                key={doc.id}
+                style={{
+                  backgroundColor: '#AED581',
+                  padding: '10px',
+                  borderRadius: '10px',
+                  boxShadow: '3px 3px 5px rgba(0, 0, 0, 0.3)',
+                }}
+              >
+                <p>{doc.taskData}</p>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
+                  <button onClick={() => handleDelete(doc.id)}>Remover</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
